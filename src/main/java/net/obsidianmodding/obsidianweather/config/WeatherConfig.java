@@ -18,6 +18,7 @@ public final class WeatherConfig {
 
     private final int spawnCheckIntervalTicks;
     private final double spawnChancePerCheck;
+    private final double netherFirenadoChanceMultiplier;
     private final int maxConcurrentPerWorld;
     private final double minimumSpawnDistance;
     private final double maximumSpawnDistance;
@@ -42,7 +43,9 @@ public final class WeatherConfig {
     private WeatherConfig(FileConfiguration config, Logger logger) {
         spawnCheckIntervalTicks = positive(config.getInt("spawn.check-interval-ticks", 100), 100);
         spawnChancePerCheck = clamp(config.getDouble("spawn.chance-per-check", 0.004), 0.0, 1.0);
-        maxConcurrentPerWorld = positive(config.getInt("spawn.max-concurrent-per-world", 2), 2);
+        netherFirenadoChanceMultiplier = Math.max(0.0,
+                config.getDouble("spawn.nether-firenado-chance-multiplier", 4.0));
+        maxConcurrentPerWorld = positive(config.getInt("spawn.max-concurrent-per-world", 8), 8);
         minimumSpawnDistance = Math.max(0.0, config.getDouble("spawn.minimum-distance-from-player", 48.0));
         maximumSpawnDistance = Math.max(minimumSpawnDistance,
                 config.getDouble("spawn.maximum-distance-from-player", 112.0));
@@ -107,6 +110,10 @@ public final class WeatherConfig {
 
     public double spawnChancePerCheck() {
         return spawnChancePerCheck;
+    }
+
+    public double netherFirenadoChanceMultiplier() {
+        return netherFirenadoChanceMultiplier;
     }
 
     public int maxConcurrentPerWorld() {

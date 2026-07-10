@@ -1,7 +1,7 @@
 package net.obsidianmodding.obsidianweather.tornado.movement;
 
+import java.util.OptionalInt;
 import net.obsidianmodding.obsidianweather.tornado.core.TornadoInstance;
-import org.bukkit.HeightMap;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.util.Vector;
@@ -29,8 +29,16 @@ public final class PathMovement {
             return false;
         }
 
-        int surfaceY = world.getHighestBlockYAt(next.getBlockX(), next.getBlockZ(), HeightMap.WORLD_SURFACE);
-        next.setY(Math.min(world.getMaxHeight() - 1, Math.max(world.getMinHeight() + 1, surfaceY + 1.0)));
+        OptionalInt groundY = GroundLocator.findGroundY(
+                world,
+                next.getBlockX(),
+                next.getBlockZ(),
+                tornado.location().getY()
+        );
+        if (groundY.isEmpty()) {
+            return false;
+        }
+        next.setY(groundY.getAsInt());
         tornado.heading(heading);
         tornado.moveTo(next);
         return true;

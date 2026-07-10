@@ -21,9 +21,19 @@ public final class FirenadoBehavior implements TornadoBehavior {
     }
 
     @Override
+    public boolean canSpawnNaturallyIn(World world) {
+        return world.getEnvironment() == World.Environment.NETHER
+                || TornadoBehavior.super.canSpawnNaturallyIn(world);
+    }
+
+    @Override
     public boolean canSpawnAt(Location location) {
-        return location.getWorld() != null
-                && (location.getBlock().getTemperature() >= 0.8 || hasNearbyHeatSource(location));
+        if (location.getWorld() == null) {
+            return false;
+        }
+        return location.getWorld().getEnvironment() == World.Environment.NETHER
+                || location.getBlock().getTemperature() >= 0.8
+                || hasNearbyHeatSource(location);
     }
 
     @Override

@@ -7,7 +7,10 @@ spawn:
   # not delay the next roll.
   check-interval-ticks: 100
   chance-per-check: 0.004
-  max-concurrent-per-world: 2
+  # Nether firenado rolls use chance-per-check multiplied by this value.
+  nether-firenado-chance-multiplier: 4.0
+  # This is a safety cap, not a spawn cooldown. The default leaves room for large worlds.
+  max-concurrent-per-world: 8
   minimum-distance-from-player: 48.0
   maximum-distance-from-player: 112.0
   # Use ['*'] for every world, or list exact world names.
@@ -124,7 +127,7 @@ types:
         spawn-weight: 0.5
 
   firenado:
-    # Naturally eligible in hot biomes or near fire/lava during thunder. It ignites entities and terrain.
+    # Naturally eligible in hot storm biomes, near fire/lava during thunder, and throughout the Nether.
     enabled: true
     spawn-weight: 15.0
     tiers:

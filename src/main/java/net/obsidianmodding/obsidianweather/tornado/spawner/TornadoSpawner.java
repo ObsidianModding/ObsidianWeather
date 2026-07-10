@@ -1,11 +1,12 @@
 package net.obsidianmodding.obsidianweather.tornado.spawner;
 
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.Random;
 import java.util.function.Supplier;
 import net.obsidianmodding.obsidianweather.config.WeatherConfig;
 import net.obsidianmodding.obsidianweather.tornado.core.TornadoManager;
-import org.bukkit.HeightMap;
+import net.obsidianmodding.obsidianweather.tornado.movement.GroundLocator;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -43,7 +44,7 @@ public final class TornadoSpawner {
     private void attemptWorldSpawn(World world, WeatherConfig config) {
         if (!config.affects(world)
                 || tornadoManager.count(world) >= config.maxConcurrentPerWorld()
-                || random.nextDouble() >= config.spawnChancePerCheck()) {
+                || random.nextDouble() >= spawnChance(world, config)) {
             return;
         }
         List<Player> players = world.getPlayers().stream().filter(Player::isValid).toList();
@@ -59,10 +60,21 @@ public final class TornadoSpawner {
         if (!world.isChunkLoaded(x >> 4, z >> 4)) {
             return;
         }
-        int y = world.getHighestBlockYAt(x, z, HeightMap.WORLD_SURFACE) + 1;
-        Location spawn = new Location(world, x + 0.5, y, z + 0.5);
+        OptionalInt groundY = GroundLocator.findGroundY(world, x, z, anchor.getLocation().getY());
+        if (groundY.isEmpty()) {
+            return;
+        }
+        Location spawn = new Location(world, x + 0.5, groundY.getAsInt(), z + 0.5);
         if (world.getWorldBorder().isInside(spawn)) {
             tornadoManager.spawn(spawn, null, null, true);
         }
+    }
+
+    private double spawnChance(World world, WeatherConfig config) {
+        double chance = config.spawnChancePerCheck();
+        if (world.getEnvironment() == World.Environment.NETHER) {
+            chance *= config.netherFirenadoChanceMultiplier();
+        }
+        return Math.min(1.0, chance);
     }
 }

@@ -5,12 +5,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.OptionalInt;
 import net.obsidianmodding.obsidianweather.ObsidianWeatherPlugin;
 import net.obsidianmodding.obsidianweather.tornado.core.TornadoInstance;
 import net.obsidianmodding.obsidianweather.tornado.core.TornadoManager;
+import net.obsidianmodding.obsidianweather.tornado.movement.GroundLocator;
 import net.obsidianmodding.obsidianweather.tornado.tier.TornadoTier;
 import net.obsidianmodding.obsidianweather.tornado.type.TornadoType;
-import org.bukkit.HeightMap;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -63,7 +64,7 @@ public final class ObsidianWeatherCommand implements CommandExecutor, TabComplet
 
     private boolean spawn(CommandSender sender, String label, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage("Usage: /" + label + " spawn <world> [x z] [type] [tier]");
+            sender.sendMessage("Usage: /" + label + " spawn <world> [x z] [type] [rating]");
             return true;
         }
         World world = plugin.getServer().getWorld(args[1]);
@@ -100,7 +101,7 @@ public final class ObsidianWeatherCommand implements CommandExecutor, TabComplet
         if (args.length > optionIndex + 1) {
             Optional<TornadoTier> parsed = TornadoTier.parse(args[optionIndex + 1]);
             if (parsed.isEmpty()) {
-                sender.sendMessage("Unknown tornado tier: " + args[optionIndex + 1]);
+                sender.sendMessage("Unknown Fujita rating: " + args[optionIndex + 1]);
                 return true;
             }
             tier = parsed.get();
@@ -112,16 +113,24 @@ public final class ObsidianWeatherCommand implements CommandExecutor, TabComplet
             sender.sendMessage("That chunk is not loaded; move closer before spawning a tornado.");
             return true;
         }
-        int y = world.getHighestBlockYAt(blockX, blockZ, HeightMap.WORLD_SURFACE) + 1;
-        Location location = new Location(world, x, y, z);
+        double referenceY = world.getSpawnLocation().getY();
+        if (sender instanceof Player player && player.getWorld().equals(world)) {
+            referenceY = player.getLocation().getY();
+        }
+        OptionalInt groundY = GroundLocator.findGroundY(world, blockX, blockZ, referenceY);
+        if (groundY.isEmpty()) {
+            sender.sendMessage("Could not find open ground near those coordinates.");
+            return true;
+        }
+        Location location = new Location(world, x, groundY.getAsInt(), z);
         Optional<TornadoInstance> spawned = tornadoManager.spawn(location, type, tier, false);
         if (spawned.isEmpty()) {
             sender.sendMessage("Could not spawn a tornado (type disabled or per-world cap reached).");
             return true;
         }
         TornadoInstance tornado = spawned.get();
-        sender.sendMessage("Spawned " + tornado.tier().configKey() + " " + tornado.type().configKey()
-                + " tornado with id " + tornado.id() + ".");
+        sender.sendMessage("Spawned " + tornado.tier().displayName() + " " + tornado.type().configKey()
+                + profileSuffix(tornado) + " tornado with id " + tornado.id() + ".");
         return true;
     }
 
@@ -145,7 +154,7 @@ public final class ObsidianWeatherCommand implements CommandExecutor, TabComplet
         for (TornadoInstance tornado : active) {
             Location location = tornado.location();
             sender.sendMessage("- " + tornado.id() + " " + tornado.type().configKey() + "/"
-                    + tornado.tier().configKey() + " in " + tornado.world().getName() + " at "
+                    + tornado.tier().displayName() + profileSuffix(tornado) + " in " + tornado.world().getName() + " at "
                     + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ()
                     + " (" + tornado.remainingSeconds() + "s remaining)");
         }
@@ -163,7 +172,7 @@ public final class ObsidianWeatherCommand implements CommandExecutor, TabComplet
     }
 
     private void sendUsage(CommandSender sender, String label) {
-        sender.sendMessage("/" + label + " spawn <world> [x z] [type] [tier]");
+        sender.sendMessage("/" + label + " spawn <world> [x z] [type] [rating]");
         sender.sendMessage("/" + label + " stop <id|all>");
         sender.sendMessage("/" + label + " list");
         sender.sendMessage("/" + label + " reload");
@@ -196,6 +205,13 @@ public final class ObsidianWeatherCommand implements CommandExecutor, TabComplet
         }
         String prefix = args[args.length - 1].toLowerCase(Locale.ROOT);
         return suggestions.stream().filter(value -> value.toLowerCase(Locale.ROOT).startsWith(prefix)).toList();
+    }
+
+    private String profileSuffix(TornadoInstance tornado) {
+        if (tornado.type() != TornadoType.STANDARD) {
+            return "";
+        }
+        return " " + tornado.funnelProfile().configKey();
     }
 
     private boolean isDouble(String value) {

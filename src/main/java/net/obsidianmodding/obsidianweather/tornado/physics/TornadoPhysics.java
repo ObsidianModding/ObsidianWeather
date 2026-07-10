@@ -1,14 +1,15 @@
 package net.obsidianmodding.obsidianweather.tornado.physics;
 
 import java.util.Collection;
+import java.util.OptionalInt;
 import java.util.function.Supplier;
 import net.obsidianmodding.obsidianweather.config.WeatherConfig;
 import net.obsidianmodding.obsidianweather.integration.ProtectionAction;
 import net.obsidianmodding.obsidianweather.integration.ProtectionManager;
 import net.obsidianmodding.obsidianweather.tornado.core.TornadoInstance;
+import net.obsidianmodding.obsidianweather.tornado.movement.GroundLocator;
 import net.obsidianmodding.obsidianweather.tornado.type.TornadoType;
 import org.bukkit.GameMode;
-import org.bukkit.HeightMap;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -102,8 +103,11 @@ public final class TornadoPhysics {
             if (!world.isChunkLoaded(x >> 4, z >> 4)) {
                 continue;
             }
-            int y = world.getHighestBlockYAt(x, z, HeightMap.WORLD_SURFACE);
-            Block block = world.getBlockAt(x, y, z);
+            OptionalInt groundY = GroundLocator.findGroundY(world, x, z, center.getY());
+            if (groundY.isEmpty()) {
+                continue;
+            }
+            Block block = world.getBlockAt(x, groundY.getAsInt() - 1, z);
             Material material = block.getType();
 
             if (!config.allowsMaterial(material)
@@ -140,8 +144,13 @@ public final class TornadoPhysics {
             if (!world.isChunkLoaded(x >> 4, z >> 4)) {
                 continue;
             }
-            int surfaceY = world.getHighestBlockYAt(x, z, HeightMap.WORLD_SURFACE);
-            int y = tornado.type() == TornadoType.FIRENADO ? surfaceY + 1 : surfaceY;
+            OptionalInt groundY = GroundLocator.findGroundY(world, x, z, center.getY());
+            if (groundY.isEmpty()) {
+                continue;
+            }
+            int y = tornado.type() == TornadoType.FIRENADO
+                    ? groundY.getAsInt()
+                    : groundY.getAsInt() - 1;
             Block block = world.getBlockAt(x, y, z);
             ProtectionAction action = tornado.type() == TornadoType.FIRENADO
                     ? ProtectionAction.FIRE_SPREAD
