@@ -2,8 +2,8 @@ package net.obsidianmodding.obsidianweather.integration.worldguard;
 
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.domains.Association;
 import com.sk89q.worldguard.protection.association.Associables;
-import com.sk89q.worldguard.protection.association.Association;
 import com.sk89q.worldguard.protection.association.RegionAssociable;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
