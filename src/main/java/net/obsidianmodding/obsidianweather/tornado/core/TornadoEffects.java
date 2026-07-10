@@ -28,7 +28,7 @@ public final class TornadoEffects {
         Location center = tornado.location();
         double maxDistance = config.effectsMaxDistance();
         double maxDistanceSquared = maxDistance * maxDistance;
-        double funnelHeight = Math.min(36.0, 10.0 + tornado.stats().radius() * 1.8);
+        double funnelHeight = Math.min(42.0, 14.0 + tornado.stats().radius() * 2.0);
 
         for (Player player : tornado.world().getPlayers()) {
             double distanceSquared = player.getLocation().distanceSquared(center);
@@ -36,16 +36,46 @@ public final class TornadoEffects {
                 continue;
             }
             double falloff = 1.0 - Math.sqrt(distanceSquared) / maxDistance;
-            int particleCount = Math.min(80,
-                    Math.max(2, (int) Math.round(28.0 * tornado.stats().particleDensity() * falloff)));
-            spawnFunnel(player, tornado, center, funnelHeight, particleCount, tornado.behavior().funnelParticle());
-            int accentCount = Math.max(1, particleCount / 6);
-            spawnFunnel(player, tornado, center, funnelHeight * 0.75, accentCount,
+            double visibility = 0.3 + falloff * 0.7;
+            int shellCount = Math.min(160, Math.max(18,
+                    (int) Math.round(60.0 * tornado.stats().particleDensity() * visibility)));
+            spawnFunnelShell(player, tornado, center, funnelHeight, shellCount,
+                    tornado.behavior().funnelParticle());
+            spawnInnerColumn(player, tornado, center, funnelHeight, Math.max(6, shellCount / 4),
                     tornado.behavior().accentParticle());
+            spawnGroundRing(player, tornado, center, Math.max(10, shellCount / 3),
+                    tornado.behavior().funnelParticle());
         }
     }
 
-    private void spawnFunnel(
+    private void spawnFunnelShell(
+            Player player,
+            TornadoInstance tornado,
+            Location center,
+            double funnelHeight,
+            int count,
+            Particle particle
+    ) {
+        int strands = 3;
+        for (int i = 0; i < count; i++) {
+            int strand = i % strands;
+            double height = ((double) i / count * funnelHeight
+                    + tornado.random().nextDouble() * 0.8) % funnelHeight;
+            double heightRatio = height / funnelHeight;
+            double width = 0.7 + tornado.stats().radius() * (0.1 + 0.58 * heightRatio);
+            double angle = tornado.ageTicks() * 0.18
+                    + heightRatio * Math.PI * 8.0
+                    + strand * Math.PI * 2.0 / strands;
+            Location point = center.clone().add(
+                    Math.cos(angle) * width,
+                    height,
+                    Math.sin(angle) * width
+            );
+            player.spawnParticle(particle, point, 1, 0.12, 0.12, 0.12, 0.01);
+        }
+    }
+
+    private void spawnInnerColumn(
             Player player,
             TornadoInstance tornado,
             Location center,
@@ -54,16 +84,37 @@ public final class TornadoEffects {
             Particle particle
     ) {
         for (int i = 0; i < count; i++) {
-            double height = tornado.random().nextDouble() * funnelHeight;
+            double height = ((double) i / count * funnelHeight
+                    + tornado.random().nextDouble() * 1.2) % funnelHeight;
             double heightRatio = height / funnelHeight;
-            double width = 0.6 + tornado.stats().radius() * (0.12 + 0.72 * heightRatio);
-            double angle = tornado.random().nextDouble() * Math.PI * 2.0 + tornado.ageTicks() * 0.12;
+            double width = 0.25 + tornado.stats().radius() * 0.08 * heightRatio;
+            double angle = tornado.ageTicks() * -0.24 + heightRatio * Math.PI * 10.0;
             Location point = center.clone().add(
                     Math.cos(angle) * width,
                     height,
                     Math.sin(angle) * width
             );
-            player.spawnParticle(particle, point, 1, 0.12, 0.12, 0.12, 0.01);
+            player.spawnParticle(particle, point, 1, 0.18, 0.18, 0.18, 0.01);
+        }
+    }
+
+    private void spawnGroundRing(
+            Player player,
+            TornadoInstance tornado,
+            Location center,
+            int count,
+            Particle particle
+    ) {
+        double radius = tornado.stats().radius();
+        for (int i = 0; i < count; i++) {
+            double angle = Math.PI * 2.0 * i / count + tornado.ageTicks() * 0.2;
+            double distance = radius * (0.45 + tornado.random().nextDouble() * 0.5);
+            Location point = center.clone().add(
+                    Math.cos(angle) * distance,
+                    0.15 + tornado.random().nextDouble() * 1.35,
+                    Math.sin(angle) * distance
+            );
+            player.spawnParticle(particle, point, 1, 0.28, 0.1, 0.28, 0.02);
         }
     }
 
