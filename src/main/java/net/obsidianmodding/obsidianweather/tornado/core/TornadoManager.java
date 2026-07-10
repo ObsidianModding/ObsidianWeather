@@ -93,7 +93,7 @@ public final class TornadoManager {
         TornadoInstance tornado = new TornadoInstance(location, behavior, tier, stats);
         active.put(tornado.id(), tornado);
         warningService.notifySpawn(tornado);
-        logger.info("Spawned " + tier.configKey() + " " + behavior.type().configKey()
+        logger.info("Spawned " + tier.displayName() + " " + behavior.type().configKey()
                 + " tornado " + tornado.id() + " in " + location.getWorld().getName() + ".");
         return Optional.of(tornado);
     }
@@ -150,7 +150,7 @@ public final class TornadoManager {
         List<TornadoTier> tiers = new ArrayList<>(List.of(TornadoTier.values()));
         double total = tiers.stream().mapToDouble(tier -> settings.stats(tier).spawnWeight()).sum();
         if (total <= 0.0) {
-            return TornadoTier.WEAK;
+            return TornadoTier.F0;
         }
         double roll = random.nextDouble() * total;
         for (TornadoTier tier : tiers) {
@@ -159,6 +159,6 @@ public final class TornadoManager {
                 return tier;
             }
         }
-        return TornadoTier.WEAK;
+        return TornadoTier.F0;
     }
 }

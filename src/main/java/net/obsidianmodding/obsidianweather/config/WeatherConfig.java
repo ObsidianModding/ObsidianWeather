@@ -66,7 +66,7 @@ public final class WeatherConfig {
         warnings = new WarningSettings(
                 config.getBoolean("warnings.enabled", false),
                 config.getDouble("warnings.radius", 64.0),
-                config.getString("warnings.message", "A deep, distant rumble rolls through the storm.")
+                config.getString("warnings.message", "A deep, distant rumble rolls across the land.")
         );
         towny = new TownySettings(
                 config.getBoolean("towny.destroy-towns", false),
@@ -79,9 +79,7 @@ public final class WeatherConfig {
             String path = "types." + type.configKey();
             EnumMap<TornadoTier, TierStats> loadedTiers = new EnumMap<>(TornadoTier.class);
             for (TornadoTier tier : TornadoTier.values()) {
-                ConfigurationSection section = config.getConfigurationSection(
-                        path + ".tiers." + tier.configKey());
-                loadedTiers.put(tier, TierStats.from(section, tier));
+                loadedTiers.put(tier, TierStats.from(tierSection(config, path, tier), tier));
             }
             double defaultWeight = switch (type) {
                 case STANDARD -> 60.0;
@@ -185,6 +183,22 @@ public final class WeatherConfig {
 
     public TypeSettings type(TornadoType type) {
         return types.get(type);
+    }
+
+    private static ConfigurationSection tierSection(
+            FileConfiguration config,
+            String typePath,
+            TornadoTier tier
+    ) {
+        String currentPath = typePath + ".tiers." + tier.configKey();
+        if (config.isSet(currentPath) || tier.legacyConfigKey() == null) {
+            return config.getConfigurationSection(currentPath);
+        }
+        String legacyPath = typePath + ".tiers." + tier.legacyConfigKey();
+        if (config.isSet(legacyPath)) {
+            return config.getConfigurationSection(legacyPath);
+        }
+        return config.getConfigurationSection(currentPath);
     }
 
     private static Set<String> normalizedWorlds(java.util.List<String> configured) {

@@ -40,11 +40,12 @@ public record TierStats(
 
     public static TierStats defaultsFor(TornadoTier tier) {
         return switch (tier) {
-            case WEAK -> new TierStats(6.0, 0.12, secondsToTicks(90), 2, 0.65, 0.65, 45);
-            case MODERATE -> new TierStats(8.0, 0.15, secondsToTicks(120), 3, 0.9, 0.85, 30);
-            case STRONG -> new TierStats(11.0, 0.18, secondsToTicks(150), 4, 1.2, 1.0, 16);
-            case SEVERE -> new TierStats(14.0, 0.21, secondsToTicks(180), 6, 1.6, 1.25, 7);
-            case VIOLENT -> new TierStats(18.0, 0.24, secondsToTicks(210), 8, 2.2, 1.5, 2);
+            case F0 -> new TierStats(6.0, 0.12, secondsToTicks(90), 2, 0.65, 0.65, 45);
+            case F1 -> new TierStats(8.0, 0.15, secondsToTicks(120), 3, 0.9, 0.85, 30);
+            case F2 -> new TierStats(11.0, 0.18, secondsToTicks(150), 4, 1.2, 1.0, 16);
+            case F3 -> new TierStats(14.0, 0.21, secondsToTicks(180), 6, 1.6, 1.25, 7);
+            case F4 -> new TierStats(18.0, 0.24, secondsToTicks(210), 8, 2.2, 1.5, 2);
+            case F5 -> new TierStats(22.0, 0.27, secondsToTicks(240), 10, 3.0, 1.8, 0.5);
         };
     }
 
