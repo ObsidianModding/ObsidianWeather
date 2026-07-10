@@ -19,6 +19,7 @@
         <paper.version>1.21.11-R0.1-SNAPSHOT</paper.version>
         <worldguard.version>7.0.17</worldguard.version>
         <towny.version>0.103.0.0</towny.version>
+        <bstats.version>3.2.1</bstats.version>
     </properties>
 
     <repositories>
@@ -55,6 +56,11 @@
             <version>${towny.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-bukkit</artifactId>
+            <version>${bstats.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -90,6 +96,28 @@
                         </manifestEntries>
                     </archive>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.6.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <relocations>
+                                <relocation>
+                                    <pattern>org.bstats</pattern>
+                                    <shadedPattern>net.obsidianmodding.obsidianweather.lib.bstats</shadedPattern>
+                                </relocation>
+                            </relocations>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

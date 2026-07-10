@@ -16,6 +16,7 @@ ObsidianWeather is a Paper plugin that adds dangerous, discoverable wind events 
 - Clearly shaped, nearby-only particle funnels and sound with distance falloff.
 - No boss bar, countdown, action bar, siren, or default chat warning. An optional local chat cue is off by default.
 - Runtime-safe soft integrations for WorldGuard and Towny.
+- Anonymous, server-owner-controllable usage metrics through bStats.
 - Admin spawning, stopping, listing, reloading, and tab completion.
 
 ## Requirements
@@ -55,6 +56,10 @@ Both integrations are true `softdepend` entries. Their classes live in isolated 
 | Towny | Wilderness remains unaffected. Claimed blocks are protected by default; damage, knockback, and destruction are independently configured. Player damage respects location-aware PvP and firenado fire respects the town fire toggle. |
 
 If both are installed, every integration must allow an action. Failed protection queries deny safely. Without them, ObsidianWeather follows its own configuration.
+
+## Anonymous metrics
+
+ObsidianWeather uses bStats plugin ID `32529` to collect bStats' standard anonymous server and plugin usage metrics. The library is bundled and relocated inside the plugin, so no separate bStats plugin is required. Server owners can disable metrics globally in `plugins/bStats/config.yml`; see the [bStats server-owner documentation](https://bstats.org/docs/server-owners) for details.
 
 ## Commands and permissions
 
@@ -154,7 +159,7 @@ Columns: radius (`R`), movement (`S`), lifespan seconds (`L`), pickup limit (`P`
 
 Run `mvn -B clean package` with Java 21. The plugin JAR is written under `target/`.
 
-The [Build workflow](.github/workflows/build.yml) runs on pushes to `main` and pull requests, caches Maven dependencies, packages the plugin, and uploads `ObsidianWeather-*.jar` as the `ObsidianWeather` artifact for 14 days. Artifacts are available from successful runs in the repository's **Actions** tab.
+The [Build workflow](.github/workflows/build.yml) runs on pushes to `main` and pull requests, caches Maven dependencies, packages the shaded plugin, and uploads `ObsidianWeather-*.jar` as the `ObsidianWeather` artifact for 14 days. Artifacts are available from successful runs in the repository's **Actions** tab.
 
 Contributors should build locally with `mvn -B clean package` before pushing whenever Maven is available and still confirm CI. If Maven is unavailable in a particular environment, rely on GitHub Actions and do not claim a local build passed.
 
