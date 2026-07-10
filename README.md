@@ -4,15 +4,14 @@ ObsidianWeather is a Paper plugin that turns vanilla thunderstorms into dangerou
 
 ## Features
 
-- Five independently tunable severity tiers: Weak, Moderate, Strong, Severe, and Violent.
-- Four behaviorally distinct tornado types:
-  - **Standard:** the baseline moving funnel, block pickup, debris, rotational lift, and damage.
-  - **Firenado:** forms in hot biomes or near fire/lava, burns entities, and starts protected-policy-aware fires.
-  - **Icenado:** forms in frozen biomes, applies freezing and slowness, extinguishes fire, and freezes surface water.
-  - **Waterspout:** forms only over ocean/river water, moves 25% faster, pulls entities downward with stronger horizontal force, and never lifts land blocks.
-- A fresh weighted probability roll every configured interval during vanilla thunderstorms. There is no post-spawn cooldown.
-- Per-world concurrency caps and loaded-chunk-only movement; tornadoes never force chunk generation.
-- Budgeted surface sampling instead of synchronous radius-wide block scans.
+- Five independently tunable tiers: Weak, Moderate, Strong, Severe, and Violent.
+- Four behaviorally distinct types:
+  - **Standard:** baseline moving funnel, debris, rotational lift, and damage.
+  - **Firenado:** forms in hot biomes or near fire/lava, burns entities, and starts policy-aware fires.
+  - **Icenado:** forms in frozen biomes, applies freezing/slowness, extinguishes fire, and freezes water.
+  - **Waterspout:** forms over ocean/river water, moves 25% faster, pulls entities downward, and never lifts land blocks.
+- A fresh weighted probability roll every configured interval during vanilla thunderstorms, with no post-spawn cooldown.
+- Per-world concurrency caps, loaded-chunk-only movement, and budgeted surface sampling.
 - Nearby-only particles and sound with distance falloff.
 - No boss bar, countdown, action bar, siren, or default chat warning. An optional local chat cue is off by default.
 - Runtime-safe soft integrations for WorldGuard and Towny.
@@ -22,105 +21,104 @@ ObsidianWeather is a Paper plugin that turns vanilla thunderstorms into dangerou
 
 - Paper **1.21.11 or newer in the 1.21 line**
 - Java **21**
-- Maven is only needed when building from source; server owners install the produced JAR.
+- Maven when building from source
 
 ## Installation
 
 1. Download an `ObsidianWeather-*.jar` from a successful GitHub Actions build artifact.
-2. Stop the Paper server.
-3. Place the JAR in the server's `plugins/` directory.
-4. Start the server once to create `plugins/ObsidianWeather/config.yml`.
-5. Adjust the configuration and run `/obsidianweather reload`, or restart the server.
+2. Stop the Paper server and place the JAR in `plugins/`.
+3. Start the server once to create `plugins/ObsidianWeather/config.yml`.
+4. Adjust the configuration and run `/obsidianweather reload`, or restart the server.
 
 WorldGuard and Towny are optional. Do not install either plugin solely for ObsidianWeather.
 
 ## How spawning works
 
-Every `spawn.check-interval-ticks`, each configured world gets an independent probability roll if it is currently thundering, has an online player, and is below its tornado cap. A candidate location is chosen in a loaded chunk near a player. The plugin filters enabled tornado types by their environment constraints, rolls a type by weight, then rolls that type's tier by its own tier weights.
+Every `spawn.check-interval-ticks`, each configured world gets an independent probability roll if it is thundering, has an online player, and is below its tornado cap. A candidate location is chosen in a loaded chunk near a player. The plugin filters enabled tornado types by environment, rolls a type by weight, then rolls that type's tier by its own weights.
 
 A successful spawn does not alter the next probability check. This continuous model intentionally has no “wait N minutes after a tornado” timer.
 
 ## Environmental awareness
 
-Players normally discover tornadoes through their funnels, debris, nearby weather particles, and local roar or elemental sounds. Effects are sent only to players within `effects.max-distance` and diminish with range.
+Players normally discover tornadoes through funnels, debris, nearby particles, and local roar or elemental sounds. Effects are sent only within `effects.max-distance` and diminish with range.
 
-`warnings.enabled` optionally sends one minimal chat message to players near the new funnel or its short projected path. It defaults to `false`, is never server-wide, and does not create persistent UI.
+`warnings.enabled` optionally sends one minimal chat message to players near a new funnel or its short projected path. It defaults to `false`, is never server-wide, and creates no persistent UI.
 
 ## Protection integrations
 
-Both integrations are true `softdepend` entries. Their classes live in isolated packages and are loaded only when the corresponding plugin and API are present.
+Both integrations are true `softdepend` entries. Their classes live in isolated packages and load only when the corresponding plugin and API are present.
 
-| Integration | Installed | Not installed |
-|---|---|---|
-| WorldGuard | Tornado block changes, fire, knockback, and damage are denied wherever a non-member actor fails the region `BUILD` query. | All non-Towny wilderness behavior follows ObsidianWeather's own config. |
-| Towny | Wilderness is unaffected by Towny policy. Claimed blocks are protected by default. Player damage, entity knockback, and town destruction are independently configured. Player damage also respects Towny's location-aware PvP decision; firenado fire respects the town fire toggle. | All non-WorldGuard areas follow ObsidianWeather's own config. |
+| Integration | Behavior when installed |
+|---|---|
+| WorldGuard | Block changes, fire, knockback, and damage are denied wherever a non-member actor fails the region `BUILD` query. |
+| Towny | Wilderness remains unaffected. Claimed blocks are protected by default; damage, knockback, and destruction are independently configured. Player damage respects location-aware PvP and firenado fire respects the town fire toggle. |
 
-If both are installed, every active integration must allow an action before it occurs. A failed protection query denies the action safely.
+If both are installed, every integration must allow an action. Failed protection queries deny safely. Without them, ObsidianWeather follows its own configuration.
 
 ## Commands and permissions
 
-All subcommands require `obsidianweather.admin`, which defaults to server operators.
+All subcommands require `obsidianweather.admin`, which defaults to operators.
 
 | Command | Description |
 |---|---|
-| `/obsidianweather spawn <world> [x z] [type] [tier]` | Spawn a tornado. Omitted type/tier values use weighted selection. Players may omit coordinates to use their current X/Z; console must provide them. |
+| `/obsidianweather spawn <world> [x z] [type] [tier]` | Spawn a tornado. Omitted type/tier values use weighted selection. Players may omit coordinates; console must provide them. |
 | `/obsidianweather stop <id\|all>` | Stop one tornado by full/partial ID, or all tornadoes. |
 | `/obsidianweather list` | List IDs, type, tier, world, position, and remaining lifetime. |
-| `/obsidianweather reload` | Reload `config.yml`. Existing tornadoes retain their spawn-time tier stats. |
-| `/ow ...` | Short alias for `/obsidianweather`. |
+| `/obsidianweather reload` | Reload config. Existing tornadoes retain their spawn-time tier stats. |
+| `/ow ...` | Short alias. |
 
-Valid types are `standard`, `firenado`, `icenado`, and `waterspout`. Valid tiers are `weak`, `moderate`, `strong`, `severe`, and `violent`.
+Valid types: `standard`, `firenado`, `icenado`, `waterspout`. Valid tiers: `weak`, `moderate`, `strong`, `severe`, `violent`.
 
 ## Configuration reference
 
 The bundled [`config.yml`](src/main/resources/config.yml) contains inline comments and is the source of truth.
 
-### Spawn, physics, effects, warnings, and Towny
+### Global settings
 
 | Path | Default | Meaning |
 |---|---:|---|
 | `spawn.check-interval-ticks` | `100` | Interval between independent thunderstorm chance rolls. |
-| `spawn.chance-per-check` | `0.004` | Probability per eligible world and check, from `0.0` to `1.0`. |
-| `spawn.max-concurrent-per-world` | `2` | Hard per-world active tornado cap. |
+| `spawn.chance-per-check` | `0.004` | Probability per eligible world and check. |
+| `spawn.max-concurrent-per-world` | `2` | Hard per-world active cap. |
 | `spawn.minimum-distance-from-player` | `48.0` | Minimum natural spawn distance. |
 | `spawn.maximum-distance-from-player` | `112.0` | Maximum natural spawn distance. |
-| `spawn.affected-worlds` | `['*']` | Exact world names, or `*` for all worlds. |
-| `physics.block-pickup-enabled` | `true` | Allow eligible tornadoes to turn blocks into falling debris. |
-| `physics.entity-pickup-enabled` | `true` | Apply rotational/updraft velocity to nearby entities. |
-| `physics.damage-enabled` | `true` | Enable direct periodic damage and debris entity damage. |
-| `physics.base-damage` | `1.5` | Direct damage before the tier multiplier. |
-| `physics.damage-interval-ticks` | `20` | Interval between direct damage applications. |
-| `physics.blocks-per-tick` | `12` | Maximum sampled pickup attempts per tornado per tick. |
-| `physics.variant-blocks-per-tick` | `2` | Maximum fire/freeze terrain attempts per tornado per tick. |
-| `physics.entities-per-tick` | `48` | Maximum nearby entities processed per tornado per tick. |
-| `physics.block-whitelist` | `[]` | If non-empty, only listed materials may be lifted. |
-| `physics.block-blacklist` | see YAML | Materials never lifted in addition to hard-coded unbreakable/tile-state safety. |
-| `effects.max-distance` | `96.0` | Player-local particle/sound cutoff and falloff distance. |
-| `effects.particle-interval-ticks` | `2` | Particle rendering interval. |
+| `spawn.affected-worlds` | `['*']` | Exact world names, or `*` for all. |
+| `physics.block-pickup-enabled` | `true` | Allow eligible block debris. |
+| `physics.entity-pickup-enabled` | `true` | Apply vortex velocity. |
+| `physics.damage-enabled` | `true` | Enable direct and debris damage. |
+| `physics.base-damage` | `1.5` | Direct damage before tier scaling. |
+| `physics.damage-interval-ticks` | `20` | Direct damage interval. |
+| `physics.blocks-per-tick` | `12` | Pickup attempt budget per tornado. |
+| `physics.variant-blocks-per-tick` | `2` | Fire/freeze attempt budget per tornado. |
+| `physics.entities-per-tick` | `48` | Entity budget per tornado. |
+| `physics.block-whitelist` | `[]` | Optional allowed-material list. |
+| `physics.block-blacklist` | see YAML | Disallowed materials in addition to built-in safety. |
+| `effects.max-distance` | `96.0` | Particle/sound cutoff and falloff distance. |
+| `effects.particle-interval-ticks` | `2` | Particle interval. |
 | `effects.sound-interval-ticks` | `40` | Ambient sound interval. |
-| `warnings.enabled` | `false` | Enable the optional one-time nearby chat cue. |
+| `warnings.enabled` | `false` | Enable the nearby one-time chat cue. |
 | `warnings.radius` | `64.0` | Current/projected-position recipient radius. |
-| `warnings.message` | distant-rumble text | Minimal chat cue text. |
-| `towny.destroy-towns` | `false` | Permit block pickup and elemental transformations in claims. |
-| `towny.damage-players-in-towns` | `true` | Permit player damage when Towny's location PvP decision also allows it. |
-| `towny.knockback-entities-in-towns` | `true` | Permit non-destructive vortex velocity in claims. |
+| `warnings.message` | distant-rumble text | Chat cue text. |
+| `towny.destroy-towns` | `false` | Permit block/elemental changes in claims. |
+| `towny.damage-players-in-towns` | `true` | Permit player damage when Towny PvP also allows it. |
+| `towny.knockback-entities-in-towns` | `true` | Permit vortex velocity in claims. |
 
-### Type-level defaults
+### Type defaults
 
-| Type | Enabled | Selection weight | Natural constraint | Extra behavior |
+| Type | Enabled | Weight | Natural constraint | Extra behavior |
 |---|---:|---:|---|---|
-| `standard` | `true` | `60.0` | Any eligible loaded location | Baseline pickup and vortex. |
-| `firenado` | `true` | `15.0` | Hot biome or nearby fire/lava | Fire trail and entity ignition. |
-| `icenado` | `true` | `15.0` | Cold/snow/frozen biome | Freezing, slowness, water freezing. |
-| `waterspout` | `true` | `10.0` | Water in ocean/river biome | 1.25x movement, downward pull, no blocks. |
+| `standard` | `true` | `60.0` | Any eligible loaded location | Baseline pickup/vortex. |
+| `firenado` | `true` | `15.0` | Hot biome or nearby fire/lava | Fire and ignition. |
+| `icenado` | `true` | `15.0` | Cold/snow/frozen biome | Freezing and slowness. |
+| `waterspout` | `true` | `10.0` | Ocean/river water | Faster, downward pull, no blocks. |
 
-Each type owns `types.<type>.tiers.<tier>`. Tier fields are `radius`, `movement-speed`, `lifespan-seconds`, `pickup-weight-limit`, `damage-multiplier`, `particle-density`, and `spawn-weight`.
+Each type owns `types.<type>.tiers.<tier>`. Fields are `radius`, `movement-speed`, `lifespan-seconds`, `pickup-weight-limit`, `damage-multiplier`, `particle-density`, and `spawn-weight`.
 
-Pickup weight uses this approximate scale: `1` foliage/plants, `2` soil/sand, `3` wood, `4` stone, `6` metals, and `99` obsidian-class blocks. Tile states and unbreakable/special blocks remain protected regardless of the value.
+Pickup weights approximate: `1` foliage/plants, `2` soil/sand, `3` wood, `4` stone, `6` metals, `99` obsidian-class. Tile states and unbreakable/special blocks remain protected.
 
 ### Complete tier defaults
 
-Columns: radius (`R`), movement speed (`S`), lifespan seconds (`L`), pickup weight limit (`P`), damage multiplier (`D`), particle density (`Fx`), and tier spawn weight (`W`).
+Columns: radius (`R`), movement (`S`), lifespan seconds (`L`), pickup limit (`P`), damage (`D`), particle density (`Fx`), tier weight (`W`).
 
 | Type | Tier | R | S | L | P | D | Fx | W |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
@@ -145,22 +143,17 @@ Columns: radius (`R`), movement speed (`S`), lifespan seconds (`L`), pickup weig
 | Waterspout | Severe | 13 | 0.23 | 155 | 0 | 1.75 | 1.35 | 5.5 |
 | Waterspout | Violent | 16 | 0.27 | 180 | 0 | 2.3 | 1.6 | 1.5 |
 
-## Building with GitHub Actions
+## Building
 
-The [Build workflow](.github/workflows/build.yml) runs on every push to `main` and every pull request. It sets up Java 21, caches the local Maven repository, runs `mvn -B clean package`, and uploads `target/ObsidianWeather-*.jar` as the `ObsidianWeather` artifact for 14 days.
+Run `mvn -B clean package` with Java 21. The plugin JAR is written under `target/`.
 
-To obtain a development build:
+The [Build workflow](.github/workflows/build.yml) runs on pushes to `main` and pull requests, caches Maven dependencies, packages the plugin, and uploads `ObsidianWeather-*.jar` as the `ObsidianWeather` artifact for 14 days. Artifacts are available from successful runs in the repository's **Actions** tab.
 
-1. Open the repository's **Actions** tab.
-2. Select a successful **Build** run.
-3. Download the **ObsidianWeather** artifact from the run summary.
-4. Extract the ZIP and install the JAR.
-
-This repository's documented local Flatpak development environment does not provide Maven. Build verification there is intentionally performed through GitHub Actions.
+Contributors should build locally with `mvn -B clean package` before pushing whenever Maven is available and still confirm CI. If Maven is unavailable in a particular environment, rely on GitHub Actions and do not claim a local build passed.
 
 ## Contributing
 
-Keep changes small and focused, preserve the type-strategy and protection-integration boundaries, and update the config reference when adding tunables. Repository coding agents must follow [`AGENTS.md`](AGENTS.md); Claude Code must also follow [`CLAUDE.md`](CLAUDE.md).
+Keep changes focused, preserve type-strategy and protection-integration boundaries, and update config documentation when adding tunables. Contributors should use a focused branch, build locally when Maven is available, and submit a pull request. Direct pushes to `main` are reserved for the maintainer's explicitly requested workflow. Coding agents must follow [`AGENTS.md`](AGENTS.md); Claude Code must also follow [`CLAUDE.md`](CLAUDE.md).
 
 ## License
 
