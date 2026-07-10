@@ -1,0 +1,251 @@
+# ObsidianWeather configuration
+# Changes apply after /obsidianweather reload. Existing tornadoes keep the stats they spawned with.
+
+spawn:
+  # A fresh probability roll is made at this interval while a world is thundering.
+  # This is not a cooldown: a successful spawn does not delay the next roll.
+  check-interval-ticks: 100
+  chance-per-check: 0.004
+  max-concurrent-per-world: 2
+  minimum-distance-from-player: 48.0
+  maximum-distance-from-player: 112.0
+  # Use ['*'] for every world, or list exact world names.
+  affected-worlds:
+    - '*'
+
+physics:
+  block-pickup-enabled: true
+  entity-pickup-enabled: true
+  # Controls direct periodic damage and whether thrown debris can hurt entities.
+  # Normal Minecraft fall damage still applies after an entity is thrown.
+  damage-enabled: true
+  base-damage: 1.5
+  damage-interval-ticks: 20
+  # Hard per-tornado budgets. Raising these increases main-thread work.
+  blocks-per-tick: 12
+  variant-blocks-per-tick: 2
+  entities-per-tick: 48
+  # Empty means all otherwise-safe materials. If populated, only listed blocks can be lifted.
+  block-whitelist: []
+  # Tile entities and technically unbreakable blocks are always protected in code.
+  block-blacklist:
+    - BEDROCK
+    - BARRIER
+    - END_PORTAL_FRAME
+    - REINFORCED_DEEPSLATE
+    - SPAWNER
+    - TRIAL_SPAWNER
+    - VAULT
+
+effects:
+  # Particles and sounds are sent only to players inside this distance and fade with range.
+  max-distance: 96.0
+  particle-interval-ticks: 2
+  sound-interval-ticks: 40
+
+warnings:
+  # Environmental particles and sounds are the intended warning system.
+  # This optional nearby-only chat cue is deliberately disabled by default.
+  enabled: false
+  radius: 64.0
+  message: 'A deep, distant rumble rolls through the storm.'
+
+towny:
+  # Safe default: claimed town blocks are not destroyed or transformed.
+  destroy-towns: false
+  # These can remain enabled to preserve danger without structural griefing.
+  damage-players-in-towns: true
+  knockback-entities-in-towns: true
+
+# Every type has an independent type-selection weight and a complete tier matrix.
+# Tier keys:
+#   radius: horizontal effect radius in blocks
+#   movement-speed: blocks moved each server tick (waterspouts also receive a 1.25x behavior multiplier)
+#   lifespan-seconds: maximum active duration
+#   pickup-weight-limit: 1=plants/leaves, 2=soil/sand, 3=wood, 4=stone, 6=metals, 99=obsidian
+#   damage-multiplier: scales direct damage and vortex force
+#   particle-density: relative client particle count
+#   spawn-weight: relative chance of this tier within this type
+types:
+  standard:
+    enabled: true
+    spawn-weight: 60.0
+    tiers:
+      weak:
+        radius: 6.0
+        movement-speed: 0.12
+        lifespan-seconds: 90
+        pickup-weight-limit: 2
+        damage-multiplier: 0.65
+        particle-density: 0.65
+        spawn-weight: 45.0
+      moderate:
+        radius: 8.0
+        movement-speed: 0.15
+        lifespan-seconds: 120
+        pickup-weight-limit: 3
+        damage-multiplier: 0.9
+        particle-density: 0.85
+        spawn-weight: 30.0
+      strong:
+        radius: 11.0
+        movement-speed: 0.18
+        lifespan-seconds: 150
+        pickup-weight-limit: 4
+        damage-multiplier: 1.2
+        particle-density: 1.0
+        spawn-weight: 16.0
+      severe:
+        radius: 14.0
+        movement-speed: 0.21
+        lifespan-seconds: 180
+        pickup-weight-limit: 6
+        damage-multiplier: 1.6
+        particle-density: 1.25
+        spawn-weight: 7.0
+      violent:
+        radius: 18.0
+        movement-speed: 0.24
+        lifespan-seconds: 210
+        pickup-weight-limit: 8
+        damage-multiplier: 2.2
+        particle-density: 1.5
+        spawn-weight: 2.0
+
+  firenado:
+    # Naturally eligible in hot biomes or near fire/lava. It ignites entities and terrain.
+    enabled: true
+    spawn-weight: 15.0
+    tiers:
+      weak:
+        radius: 5.0
+        movement-speed: 0.11
+        lifespan-seconds: 75
+        pickup-weight-limit: 2
+        damage-multiplier: 0.8
+        particle-density: 0.7
+        spawn-weight: 50.0
+      moderate:
+        radius: 7.0
+        movement-speed: 0.14
+        lifespan-seconds: 100
+        pickup-weight-limit: 3
+        damage-multiplier: 1.05
+        particle-density: 0.9
+        spawn-weight: 29.0
+      strong:
+        radius: 9.0
+        movement-speed: 0.17
+        lifespan-seconds: 130
+        pickup-weight-limit: 4
+        damage-multiplier: 1.4
+        particle-density: 1.1
+        spawn-weight: 14.0
+      severe:
+        radius: 12.0
+        movement-speed: 0.2
+        lifespan-seconds: 155
+        pickup-weight-limit: 6
+        damage-multiplier: 1.9
+        particle-density: 1.35
+        spawn-weight: 5.5
+      violent:
+        radius: 15.0
+        movement-speed: 0.23
+        lifespan-seconds: 180
+        pickup-weight-limit: 8
+        damage-multiplier: 2.6
+        particle-density: 1.65
+        spawn-weight: 1.5
+
+  icenado:
+    # Naturally eligible in freezing, snowy, or icy biomes. It freezes water and slows entities.
+    enabled: true
+    spawn-weight: 15.0
+    tiers:
+      weak:
+        radius: 7.0
+        movement-speed: 0.1
+        lifespan-seconds: 100
+        pickup-weight-limit: 2
+        damage-multiplier: 0.55
+        particle-density: 0.75
+        spawn-weight: 46.0
+      moderate:
+        radius: 9.0
+        movement-speed: 0.13
+        lifespan-seconds: 130
+        pickup-weight-limit: 3
+        damage-multiplier: 0.8
+        particle-density: 0.95
+        spawn-weight: 31.0
+      strong:
+        radius: 12.0
+        movement-speed: 0.16
+        lifespan-seconds: 160
+        pickup-weight-limit: 4
+        damage-multiplier: 1.1
+        particle-density: 1.15
+        spawn-weight: 15.0
+      severe:
+        radius: 15.0
+        movement-speed: 0.18
+        lifespan-seconds: 190
+        pickup-weight-limit: 6
+        damage-multiplier: 1.45
+        particle-density: 1.4
+        spawn-weight: 6.0
+      violent:
+        radius: 19.0
+        movement-speed: 0.2
+        lifespan-seconds: 220
+        pickup-weight-limit: 8
+        damage-multiplier: 2.0
+        particle-density: 1.7
+        spawn-weight: 2.0
+
+  waterspout:
+    # Naturally eligible only over water in ocean/river biomes. It never lifts land blocks.
+    enabled: true
+    spawn-weight: 10.0
+    tiers:
+      weak:
+        radius: 6.0
+        movement-speed: 0.14
+        lifespan-seconds: 80
+        pickup-weight-limit: 0
+        damage-multiplier: 0.7
+        particle-density: 0.7
+        spawn-weight: 52.0
+      moderate:
+        radius: 8.0
+        movement-speed: 0.17
+        lifespan-seconds: 105
+        pickup-weight-limit: 0
+        damage-multiplier: 0.95
+        particle-density: 0.9
+        spawn-weight: 28.0
+      strong:
+        radius: 10.0
+        movement-speed: 0.2
+        lifespan-seconds: 130
+        pickup-weight-limit: 0
+        damage-multiplier: 1.3
+        particle-density: 1.1
+        spawn-weight: 13.0
+      severe:
+        radius: 13.0
+        movement-speed: 0.23
+        lifespan-seconds: 155
+        pickup-weight-limit: 0
+        damage-multiplier: 1.75
+        particle-density: 1.35
+        spawn-weight: 5.5
+      violent:
+        radius: 16.0
+        movement-speed: 0.27
+        lifespan-seconds: 180
+        pickup-weight-limit: 0
+        damage-multiplier: 2.3
+        particle-density: 1.6
+        spawn-weight: 1.5
