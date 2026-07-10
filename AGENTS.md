@@ -4,13 +4,14 @@ These instructions apply to the entire repository.
 
 ## Project and non-negotiable design
 
-ObsidianWeather is a Java 21 Paper 1.21.11+ plugin. V1 implements four tornado strategies and five tiers.
+ObsidianWeather is a Java 21 Paper 1.21.11+ plugin. V1 implements five wind-event strategies and five tiers.
 
 - Do not add a spawn cooldown. `spawn.check-interval-ticks` is a probability-roll interval.
 - Do not add boss bars, action-bar countdowns, sirens, or server-wide warnings. The optional local chat cue stays off by default.
 - Never use Bukkit/Paper world or entity APIs asynchronously.
-- Never force-load chunks for a tornado.
+- Never force-load chunks for a weather event.
 - Keep WorldGuard and Towny optional soft dependencies.
+- Storm tornadoes require thunder. Dust devils require clear weather and a hot, dry biome.
 
 ## Build and verification
 
@@ -41,7 +42,7 @@ src/main/java/net/obsidianmodding/obsidianweather/
   tornado/core/             instance, manager, effects, local warning
   tornado/tier/             tier identity
   tornado/type/             behavior strategies and registry
-  tornado/spawner/          continuous thunderstorm rolls
+  tornado/spawner/          continuous weather-eligibility rolls
   tornado/movement/         bounded momentum path
   tornado/physics/          budgeted block/entity effects
   integration/              shared policy plus isolated adapters
@@ -61,9 +62,9 @@ src/main/java/net/obsidianmodding/obsidianweather/
 
 ## Tier/type architecture
 
-`TornadoTier` is severity identity. `TierStats` loads numeric values from the selected type's config matrix, so all 20 combinations may differ.
+`TornadoTier` is severity identity. `TierStats` loads numeric values from the selected type's config matrix, so all 25 combinations may differ.
 
-`TornadoBehavior` owns natural eligibility, block-pickup permission, movement multiplier, variant entity/block effects, particles, and sounds. Shared lifecycle, pathing, protection, physics, and rendering remain outside strategies.
+`TornadoBehavior` owns natural weather and location eligibility, block-pickup permission, movement multiplier, variant entity/block effects, particles, and sounds. Shared lifecycle, pathing, protection, physics, and rendering remain outside strategies.
 
 To add a type:
 
@@ -95,7 +96,7 @@ types.<type>.tiers.<tier>.particle-density
 types.<type>.tiers.<tier>.spawn-weight
 ```
 
-Every new tunable requires synchronized YAML, parser/model, consumer, and README changes. Reload replaces global config; active tornadoes intentionally retain spawn-time `TierStats`.
+Every new tunable requires synchronized YAML, parser/model, consumer, and README changes. Reload replaces global config; active events intentionally retain spawn-time `TierStats`.
 
 ## Soft-dependency pattern
 

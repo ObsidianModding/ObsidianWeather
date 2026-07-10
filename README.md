@@ -1,18 +1,19 @@
 # ObsidianWeather
 
-ObsidianWeather is a Paper plugin that turns vanilla thunderstorms into dangerous, discoverable weather. Tornadoes form near loaded players, follow bounded semi-random paths, lift configured blocks and entities, and dissipate naturally without server-wide alerts or artificial spawn cooldowns.
+ObsidianWeather is a Paper plugin that adds dangerous, discoverable wind events to Minecraft weather. Tornadoes form during vanilla thunderstorms, while dust devils cross hot, dry biomes under clear skies. Every event follows a bounded semi-random path, affects configured blocks and entities, and dissipates naturally without server-wide alerts or artificial spawn cooldowns.
 
 ## Features
 
 - Five independently tunable tiers: Weak, Moderate, Strong, Severe, and Violent.
-- Four behaviorally distinct types:
+- Five behaviorally distinct types:
   - **Standard:** baseline moving funnel, debris, rotational lift, and damage.
-  - **Firenado:** forms in hot biomes or near fire/lava, burns entities, and starts policy-aware fires.
-  - **Icenado:** forms in frozen biomes, applies freezing/slowness, extinguishes fire, and freezes water.
-  - **Waterspout:** forms over ocean/river water, moves 25% faster, pulls entities downward, and never lifts land blocks.
-- A fresh weighted probability roll every configured interval during vanilla thunderstorms, with no post-spawn cooldown.
+  - **Firenado:** forms in hot biomes or near fire/lava during thunder, burns entities, and starts policy-aware fires.
+  - **Icenado:** forms in frozen biomes during thunder, applies freezing/slowness, extinguishes fire, and freezes water.
+  - **Waterspout:** forms over ocean/river water during thunder, moves 25% faster, pulls entities downward, and never lifts land blocks.
+  - **Dust Devil:** forms under clear skies in deserts, badlands, and savannas; moves 40% faster with a low rotational pull and blinding dust.
+- A fresh weighted probability roll every configured interval, with no post-spawn cooldown.
 - Per-world concurrency caps, loaded-chunk-only movement, and budgeted surface sampling.
-- Nearby-only particles and sound with distance falloff.
+- Clearly shaped, nearby-only particle funnels and sound with distance falloff.
 - No boss bar, countdown, action bar, siren, or default chat warning. An optional local chat cue is off by default.
 - Runtime-safe soft integrations for WorldGuard and Towny.
 - Admin spawning, stopping, listing, reloading, and tab completion.
@@ -34,13 +35,13 @@ WorldGuard and Towny are optional. Do not install either plugin solely for Obsid
 
 ## How spawning works
 
-Every `spawn.check-interval-ticks`, each configured world gets an independent probability roll if it is thundering, has an online player, and is below its tornado cap. A candidate location is chosen in a loaded chunk near a player. The plugin filters enabled tornado types by environment, rolls a type by weight, then rolls that type's tier by its own weights.
+Every `spawn.check-interval-ticks`, each configured world below its event cap gets an independent probability roll. A candidate location is chosen in a loaded chunk near an online player. The plugin filters enabled types by current weather and environment, rolls an eligible type by weight, then rolls that type's tier using its own weights.
 
-A successful spawn does not alter the next probability check. This continuous model intentionally has no “wait N minutes after a tornado” timer.
+Standard tornadoes, firenadoes, icenadoes, and waterspouts require a vanilla thunderstorm. Dust devils instead require clear weather and a hot, dry biome. A successful spawn does not alter the next probability check; there is intentionally no “wait N minutes after an event” timer.
 
 ## Environmental awareness
 
-Players normally discover tornadoes through funnels, debris, nearby particles, and local roar or elemental sounds. Effects are sent only within `effects.max-distance` and diminish with range.
+Players normally discover events through their shaped funnels, debris, nearby particles, and local roar or elemental sounds. Effects are sent only within `effects.max-distance` and diminish with range.
 
 `warnings.enabled` optionally sends one minimal chat message to players near a new funnel or its short projected path. It defaults to `false`, is never server-wide, and creates no persistent UI.
 
@@ -61,13 +62,13 @@ All subcommands require `obsidianweather.admin`, which defaults to operators.
 
 | Command | Description |
 |---|---|
-| `/obsidianweather spawn <world> [x z] [type] [tier]` | Spawn a tornado. Omitted type/tier values use weighted selection. Players may omit coordinates; console must provide them. |
-| `/obsidianweather stop <id\|all>` | Stop one tornado by full/partial ID, or all tornadoes. |
+| `/obsidianweather spawn <world> [x z] [type] [tier]` | Spawn an event. Omitted type/tier values use weighted selection. Players may omit coordinates; console must provide them. |
+| `/obsidianweather stop <id\|all>` | Stop one event by full/partial ID, or all events. |
 | `/obsidianweather list` | List IDs, type, tier, world, position, and remaining lifetime. |
-| `/obsidianweather reload` | Reload config. Existing tornadoes retain their spawn-time tier stats. |
+| `/obsidianweather reload` | Reload config. Existing events retain their spawn-time tier stats. |
 | `/ow ...` | Short alias. |
 
-Valid types: `standard`, `firenado`, `icenado`, `waterspout`. Valid tiers: `weak`, `moderate`, `strong`, `severe`, `violent`.
+Valid types: `standard`, `firenado`, `icenado`, `waterspout`, `dust-devil`. Valid tiers: `weak`, `moderate`, `strong`, `severe`, `violent`.
 
 ## Configuration reference
 
@@ -77,7 +78,7 @@ The bundled [`config.yml`](src/main/resources/config.yml) contains inline commen
 
 | Path | Default | Meaning |
 |---|---:|---|
-| `spawn.check-interval-ticks` | `100` | Interval between independent thunderstorm chance rolls. |
+| `spawn.check-interval-ticks` | `100` | Interval between independent weather-event chance rolls. |
 | `spawn.chance-per-check` | `0.004` | Probability per eligible world and check. |
 | `spawn.max-concurrent-per-world` | `2` | Hard per-world active cap. |
 | `spawn.minimum-distance-from-player` | `48.0` | Minimum natural spawn distance. |
@@ -88,9 +89,9 @@ The bundled [`config.yml`](src/main/resources/config.yml) contains inline commen
 | `physics.damage-enabled` | `true` | Enable direct and debris damage. |
 | `physics.base-damage` | `1.5` | Direct damage before tier scaling. |
 | `physics.damage-interval-ticks` | `20` | Direct damage interval. |
-| `physics.blocks-per-tick` | `12` | Pickup attempt budget per tornado. |
-| `physics.variant-blocks-per-tick` | `2` | Fire/freeze attempt budget per tornado. |
-| `physics.entities-per-tick` | `48` | Entity budget per tornado. |
+| `physics.blocks-per-tick` | `12` | Pickup attempt budget per event. |
+| `physics.variant-blocks-per-tick` | `2` | Fire/freeze attempt budget per event. |
+| `physics.entities-per-tick` | `48` | Entity budget per event. |
 | `physics.block-whitelist` | `[]` | Optional allowed-material list. |
 | `physics.block-blacklist` | see YAML | Disallowed materials in addition to built-in safety. |
 | `effects.max-distance` | `96.0` | Particle/sound cutoff and falloff distance. |
@@ -107,10 +108,11 @@ The bundled [`config.yml`](src/main/resources/config.yml) contains inline commen
 
 | Type | Enabled | Weight | Natural constraint | Extra behavior |
 |---|---:|---:|---|---|
-| `standard` | `true` | `60.0` | Any eligible loaded location | Baseline pickup/vortex. |
-| `firenado` | `true` | `15.0` | Hot biome or nearby fire/lava | Fire and ignition. |
-| `icenado` | `true` | `15.0` | Cold/snow/frozen biome | Freezing and slowness. |
-| `waterspout` | `true` | `10.0` | Ocean/river water | Faster, downward pull, no blocks. |
+| `standard` | `true` | `60.0` | Thunderstorm; any eligible loaded location | Baseline pickup/vortex. |
+| `firenado` | `true` | `15.0` | Thunderstorm; hot biome or nearby fire/lava | Fire and ignition. |
+| `icenado` | `true` | `15.0` | Thunderstorm; cold/snow/frozen biome | Freezing and slowness. |
+| `waterspout` | `true` | `10.0` | Thunderstorm; ocean/river water | Faster, downward pull, no blocks. |
+| `dust-devil` | `true` | `25.0` | Clear weather; desert/badlands/savanna | Faster, low spin, blindness. |
 
 Each type owns `types.<type>.tiers.<tier>`. Fields are `radius`, `movement-speed`, `lifespan-seconds`, `pickup-weight-limit`, `damage-multiplier`, `particle-density`, and `spawn-weight`.
 
@@ -118,7 +120,7 @@ Pickup weights approximate: `1` foliage/plants, `2` soil/sand, `3` wood, `4` sto
 
 ### Complete tier defaults
 
-Columns: radius (`R`), movement (`S`), lifespan seconds (`L`), pickup limit (`P`), damage (`D`), particle density (`Fx`), tier weight (`W`).
+Columns: radius (`R`), movement (`S`), lifespan seconds (`L`), pickup limit (`P`), damage (`D`), particle density (`Fx`), tier weight (`W`). Type-specific movement multipliers apply after `S`.
 
 | Type | Tier | R | S | L | P | D | Fx | W |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
@@ -142,6 +144,11 @@ Columns: radius (`R`), movement (`S`), lifespan seconds (`L`), pickup limit (`P`
 | Waterspout | Strong | 10 | 0.20 | 130 | 0 | 1.3 | 1.1 | 13 |
 | Waterspout | Severe | 13 | 0.23 | 155 | 0 | 1.75 | 1.35 | 5.5 |
 | Waterspout | Violent | 16 | 0.27 | 180 | 0 | 2.3 | 1.6 | 1.5 |
+| Dust Devil | Weak | 4 | 0.17 | 45 | 1 | 0.25 | 1.1 | 50 |
+| Dust Devil | Moderate | 5 | 0.20 | 60 | 2 | 0.4 | 1.25 | 30 |
+| Dust Devil | Strong | 7 | 0.23 | 75 | 2 | 0.6 | 1.4 | 14 |
+| Dust Devil | Severe | 9 | 0.26 | 90 | 3 | 0.85 | 1.6 | 5 |
+| Dust Devil | Violent | 11 | 0.30 | 105 | 3 | 1.15 | 1.8 | 1 |
 
 ## Building
 

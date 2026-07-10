@@ -2,7 +2,7 @@
 
 ## Project overview
 
-ObsidianWeather is a Java 21 Paper 1.21.11+ plugin adding dangerous tornadoes to vanilla thunderstorms. The Maven artifact is `net.obsidianmodding:obsidianweather`; the entry point is `net.obsidianmodding.obsidianweather.ObsidianWeatherPlugin`.
+ObsidianWeather is a Java 21 Paper 1.21.11+ plugin adding dangerous tornadoes during thunderstorms and dust devils under clear skies. The Maven artifact is `net.obsidianmodding:obsidianweather`; the entry point is `net.obsidianmodding.obsidianweather.ObsidianWeatherPlugin`.
 
 Read `AGENTS.md` before editing. It also applies to Claude Code.
 
@@ -30,9 +30,9 @@ Use a focused branch and pull request by default. Commit directly to `main` only
 
 The main class runs one synchronous tick task. `TornadoSpawner` performs independent chance rolls at the configured interval. `TornadoManager` ages, moves, applies budgeted physics, and renders nearby-only effects.
 
-Natural spawning chooses a loaded location near a player, filters types by environment, weights the type, then weights a tier from that type's own stats. `PathMovement` preserves heading with bounded turning and stops at unloaded chunks or the world border.
+Natural spawning chooses a loaded location near a player, filters types by current weather and environment, weights the type, then weights a tier from that type's own stats. Four tornado strategies require thunder; `DustDevilBehavior` requires clear weather and a hot, dry biome. `PathMovement` preserves heading with bounded turning and stops at unloaded chunks or the world border.
 
-`TornadoTier` is identity; `TierStats` holds runtime numbers. `TornadoBehavior` strategies own eligibility, variant movement/effects, particles, and sounds. Shared lifecycle code must not be duplicated into strategies.
+`TornadoTier` is identity; `TierStats` holds runtime numbers. `TornadoBehavior` strategies own weather/location eligibility, variant movement/effects, particles, and sounds. Shared lifecycle code must not be duplicated into strategies.
 
 Per-combination config lives at `types.<type>.tiers.<tier>.<stat>`. Adding a type requires the enum, strategy, registry, fallback weight, complete five-tier config section, README update, and protection routing. Adding a tier requires every type's matrix plus fallback and docs.
 
@@ -41,7 +41,8 @@ WorldGuard/Towny are provided dependencies and softdepends. All third-party impo
 ## Gotchas
 
 - Paper API: `1.21.11-R0.1-SNAPSHOT`; Java 21; `api-version: 1.21.11`.
-- No tornado spawn cooldown. The check interval only schedules independent rolls.
+- No event spawn cooldown. The check interval only schedules independent rolls.
+- Thunder gates standard/firenado/icenado/waterspout natural spawns; clear weather gates dust devils.
 - No boss bar, action bar, timer, siren, or global warning. Local chat warning defaults off.
 - Never touch worlds asynchronously or force-load chunks.
 - Keep effects player-local and distance-limited.
