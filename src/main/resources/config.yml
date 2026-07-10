@@ -1,9 +1,10 @@
 # ObsidianWeather configuration
-# Changes apply after /obsidianweather reload. Existing tornadoes keep the stats they spawned with.
+# Changes apply after /obsidianweather reload. Existing weather events keep the stats they spawned with.
 
 spawn:
-  # A fresh probability roll is made at this interval while a world is thundering.
-  # This is not a cooldown: a successful spawn does not delay the next roll.
+  # A fresh probability roll is made at this interval. Storm tornadoes require thunder;
+  # dust devils require clear weather. This is not a cooldown: a successful spawn does
+  # not delay the next roll.
   check-interval-ticks: 100
   chance-per-check: 0.004
   max-concurrent-per-world: 2
@@ -48,7 +49,7 @@ warnings:
   # This optional nearby-only chat cue is deliberately disabled by default.
   enabled: false
   radius: 64.0
-  message: 'A deep, distant rumble rolls through the storm.'
+  message: 'A deep, distant rumble rolls across the land.'
 
 towny:
   # Safe default: claimed town blocks are not destroyed or transformed.
@@ -60,7 +61,7 @@ towny:
 # Every type has an independent type-selection weight and a complete tier matrix.
 # Tier keys:
 #   radius: horizontal effect radius in blocks
-#   movement-speed: blocks moved each server tick (waterspouts also receive a 1.25x behavior multiplier)
+#   movement-speed: blocks moved each server tick (some types also have a behavior multiplier)
 #   lifespan-seconds: maximum active duration
 #   pickup-weight-limit: 1=plants/leaves, 2=soil/sand, 3=wood, 4=stone, 6=metals, 99=obsidian
 #   damage-multiplier: scales direct damage and vortex force
@@ -113,7 +114,7 @@ types:
         spawn-weight: 2.0
 
   firenado:
-    # Naturally eligible in hot biomes or near fire/lava. It ignites entities and terrain.
+    # Naturally eligible in hot biomes or near fire/lava during thunder. It ignites entities and terrain.
     enabled: true
     spawn-weight: 15.0
     tiers:
@@ -159,7 +160,7 @@ types:
         spawn-weight: 1.5
 
   icenado:
-    # Naturally eligible in freezing, snowy, or icy biomes. It freezes water and slows entities.
+    # Naturally eligible in freezing, snowy, or icy biomes during thunder. It freezes water and slows entities.
     enabled: true
     spawn-weight: 15.0
     tiers:
@@ -205,7 +206,7 @@ types:
         spawn-weight: 2.0
 
   waterspout:
-    # Naturally eligible only over water in ocean/river biomes. It never lifts land blocks.
+    # Naturally eligible only over water in ocean/river biomes during thunder. It never lifts land blocks.
     enabled: true
     spawn-weight: 10.0
     tiers:
@@ -249,3 +250,50 @@ types:
         damage-multiplier: 2.3
         particle-density: 1.6
         spawn-weight: 1.5
+
+  dust-devil:
+    # Naturally eligible only under clear skies in hot, dry biomes. Dust devils move
+    # quickly, keep entities nearer the ground, and briefly blind anything caught inside.
+    enabled: true
+    spawn-weight: 25.0
+    tiers:
+      weak:
+        radius: 4.0
+        movement-speed: 0.17
+        lifespan-seconds: 45
+        pickup-weight-limit: 1
+        damage-multiplier: 0.25
+        particle-density: 1.1
+        spawn-weight: 50.0
+      moderate:
+        radius: 5.0
+        movement-speed: 0.2
+        lifespan-seconds: 60
+        pickup-weight-limit: 2
+        damage-multiplier: 0.4
+        particle-density: 1.25
+        spawn-weight: 30.0
+      strong:
+        radius: 7.0
+        movement-speed: 0.23
+        lifespan-seconds: 75
+        pickup-weight-limit: 2
+        damage-multiplier: 0.6
+        particle-density: 1.4
+        spawn-weight: 14.0
+      severe:
+        radius: 9.0
+        movement-speed: 0.26
+        lifespan-seconds: 90
+        pickup-weight-limit: 3
+        damage-multiplier: 0.85
+        particle-density: 1.6
+        spawn-weight: 5.0
+      violent:
+        radius: 11.0
+        movement-speed: 0.3
+        lifespan-seconds: 105
+        pickup-weight-limit: 3
+        damage-multiplier: 1.15
+        particle-density: 1.8
+        spawn-weight: 1.0

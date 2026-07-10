@@ -18,6 +18,7 @@ public final class BehaviorRegistry {
         register(registered, new FirenadoBehavior());
         register(registered, new IcenadoBehavior());
         register(registered, new WaterspoutBehavior());
+        register(registered, new DustDevilBehavior());
         behaviors = Map.copyOf(registered);
     }
 
@@ -26,8 +27,12 @@ public final class BehaviorRegistry {
     }
 
     public List<TornadoBehavior> eligibleAt(Location location, WeatherConfig config) {
+        if (location.getWorld() == null) {
+            return List.of();
+        }
         return behaviors.values().stream()
                 .filter(behavior -> config.type(behavior.type()).enabled())
+                .filter(behavior -> behavior.canSpawnNaturallyIn(location.getWorld()))
                 .filter(behavior -> behavior.canSpawnAt(location))
                 .toList();
     }

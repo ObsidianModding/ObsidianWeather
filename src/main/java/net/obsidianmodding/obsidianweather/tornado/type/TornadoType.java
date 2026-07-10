@@ -8,7 +8,8 @@ public enum TornadoType {
     STANDARD("standard"),
     FIRENADO("firenado"),
     ICENADO("icenado"),
-    WATERSPOUT("waterspout");
+    WATERSPOUT("waterspout"),
+    DUST_DEVIL("dust-devil");
 
     private final String configKey;
 

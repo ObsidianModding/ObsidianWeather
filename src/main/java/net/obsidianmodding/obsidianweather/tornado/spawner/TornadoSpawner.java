@@ -41,7 +41,7 @@ public final class TornadoSpawner {
     }
 
     private void attemptWorldSpawn(World world, WeatherConfig config) {
-        if (!config.affects(world) || !world.hasStorm() || !world.isThundering()
+        if (!config.affects(world)
                 || tornadoManager.count(world) >= config.maxConcurrentPerWorld()
                 || random.nextDouble() >= config.spawnChancePerCheck()) {
             return;

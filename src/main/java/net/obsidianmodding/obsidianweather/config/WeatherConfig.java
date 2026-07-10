@@ -88,6 +88,7 @@ public final class WeatherConfig {
                 case FIRENADO -> 15.0;
                 case ICENADO -> 15.0;
                 case WATERSPOUT -> 10.0;
+                case DUST_DEVIL -> 25.0;
             };
             loadedTypes.put(type, new TypeSettings(
                     config.getBoolean(path + ".enabled", true),

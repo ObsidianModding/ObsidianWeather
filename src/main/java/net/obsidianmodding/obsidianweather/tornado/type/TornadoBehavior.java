@@ -2,6 +2,7 @@ package net.obsidianmodding.obsidianweather.tornado.type;
 
 import org.bukkit.Location;
 import org.bukkit.Particle;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.Vector;
@@ -11,6 +12,10 @@ public interface TornadoBehavior {
     TornadoType type();
 
     boolean canSpawnAt(Location location);
+
+    default boolean canSpawnNaturallyIn(World world) {
+        return world.hasStorm() && world.isThundering();
+    }
 
     default boolean canPickupBlocks() {
         return true;

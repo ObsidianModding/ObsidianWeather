@@ -125,7 +125,9 @@ public final class TornadoPhysics {
     }
 
     private void applyVariantBlockEffects(TornadoInstance tornado, WeatherConfig config) {
-        if (tornado.type() == TornadoType.STANDARD || tornado.type() == TornadoType.WATERSPOUT) {
+        if (tornado.type() == TornadoType.STANDARD
+                || tornado.type() == TornadoType.WATERSPOUT
+                || tornado.type() == TornadoType.DUST_DEVIL) {
             return;
         }
         World world = tornado.world();
