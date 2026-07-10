@@ -1,0 +1,20 @@
+name: ObsidianWeather
+version: '${project.version}'
+main: net.obsidianmodding.obsidianweather.ObsidianWeatherPlugin
+api-version: '1.21.11'
+description: Dynamic, dangerous weather events for Paper servers
+author: ObsidianModding
+website: https://github.com/ObsidianModding/ObsidianWeather
+softdepend:
+  - WorldGuard
+  - Towny
+commands:
+  obsidianweather:
+    description: Manage ObsidianWeather tornadoes
+    usage: /<command> <spawn|stop|list|reload>
+    aliases: [ow]
+    permission: obsidianweather.admin
+permissions:
+  obsidianweather.admin:
+    description: Allows all ObsidianWeather administration commands
+    default: op
