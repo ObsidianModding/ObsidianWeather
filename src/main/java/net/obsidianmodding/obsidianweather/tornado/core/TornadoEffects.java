@@ -25,10 +25,14 @@ public final class TornadoEffects {
     }
 
     private void renderParticles(TornadoInstance tornado, WeatherConfig config) {
+        if (tornado.stats().particleDensity() <= 0.0) {
+            return;
+        }
         Location center = tornado.location();
         double maxDistance = config.effectsMaxDistance();
         double maxDistanceSquared = maxDistance * maxDistance;
-        double funnelHeight = Math.min(42.0, 14.0 + tornado.stats().radius() * 2.0);
+        double baseHeight = Math.min(42.0, 14.0 + tornado.stats().radius() * 2.0);
+        double funnelHeight = baseHeight * tornado.funnelProfile().heightMultiplier();
 
         for (Player player : tornado.world().getPlayers()) {
             double distanceSquared = player.getLocation().distanceSquared(center);
@@ -56,20 +60,23 @@ public final class TornadoEffects {
             int count,
             Particle particle
     ) {
-        int strands = 3;
+        FunnelProfile profile = tornado.funnelProfile();
+        int strands = profile.strands();
         for (int i = 0; i < count; i++) {
             int strand = i % strands;
             double height = ((double) i / count * funnelHeight
                     + tornado.random().nextDouble() * 0.8) % funnelHeight;
             double heightRatio = height / funnelHeight;
-            double width = 0.7 + tornado.stats().radius() * (0.1 + 0.58 * heightRatio);
+            double width = profile.shellWidth(tornado.stats().radius(), heightRatio, tornado.ageTicks());
             double angle = tornado.ageTicks() * 0.18
                     + heightRatio * Math.PI * 8.0
                     + strand * Math.PI * 2.0 / strands;
             Location point = center.clone().add(
-                    Math.cos(angle) * width,
+                    profile.centerOffsetX(tornado.stats().radius(), heightRatio, tornado.ageTicks())
+                            + Math.cos(angle) * width,
                     height,
-                    Math.sin(angle) * width
+                    profile.centerOffsetZ(tornado.stats().radius(), heightRatio, tornado.ageTicks())
+                            + Math.sin(angle) * width
             );
             player.spawnParticle(particle, point, 1, 0.12, 0.12, 0.12, 0.01);
         }
@@ -83,6 +90,7 @@ public final class TornadoEffects {
             int count,
             Particle particle
     ) {
+        FunnelProfile profile = tornado.funnelProfile();
         for (int i = 0; i < count; i++) {
             double height = ((double) i / count * funnelHeight
                     + tornado.random().nextDouble() * 1.2) % funnelHeight;
@@ -90,9 +98,11 @@ public final class TornadoEffects {
             double width = 0.25 + tornado.stats().radius() * 0.08 * heightRatio;
             double angle = tornado.ageTicks() * -0.24 + heightRatio * Math.PI * 10.0;
             Location point = center.clone().add(
-                    Math.cos(angle) * width,
+                    profile.centerOffsetX(tornado.stats().radius(), heightRatio, tornado.ageTicks())
+                            + Math.cos(angle) * width,
                     height,
-                    Math.sin(angle) * width
+                    profile.centerOffsetZ(tornado.stats().radius(), heightRatio, tornado.ageTicks())
+                            + Math.sin(angle) * width
             );
             player.spawnParticle(particle, point, 1, 0.18, 0.18, 0.18, 0.01);
         }
@@ -108,7 +118,7 @@ public final class TornadoEffects {
         double radius = tornado.stats().radius();
         for (int i = 0; i < count; i++) {
             double angle = Math.PI * 2.0 * i / count + tornado.ageTicks() * 0.2;
-            double distance = radius * (0.45 + tornado.random().nextDouble() * 0.5);
+            double distance = tornado.funnelProfile().groundDistance(radius, tornado.random().nextDouble());
             Location point = center.clone().add(
                     Math.cos(angle) * distance,
                     0.15 + tornado.random().nextDouble() * 1.35,

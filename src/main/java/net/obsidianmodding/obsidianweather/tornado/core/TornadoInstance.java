@@ -17,6 +17,7 @@ public final class TornadoInstance {
     private final TornadoTier tier;
     private final TierStats stats;
     private final Random random;
+    private final FunnelProfile funnelProfile;
     private final long totalLifespanTicks;
     private Location location;
     private Vector heading;
@@ -31,6 +32,9 @@ public final class TornadoInstance {
         this.tier = tier;
         this.stats = stats;
         this.random = new Random(UUID.randomUUID().getLeastSignificantBits());
+        this.funnelProfile = behavior.type() == TornadoType.STANDARD
+                ? FunnelProfile.random(random)
+                : FunnelProfile.CLASSIC_CONE;
         double angle = random.nextDouble() * Math.PI * 2.0;
         this.heading = new Vector(Math.cos(angle), 0.0, Math.sin(angle));
         this.totalLifespanTicks = stats.lifespanTicks();
@@ -79,6 +83,10 @@ public final class TornadoInstance {
 
     public Random random() {
         return random;
+    }
+
+    public FunnelProfile funnelProfile() {
+        return funnelProfile;
     }
 
     public long remainingTicks() {
