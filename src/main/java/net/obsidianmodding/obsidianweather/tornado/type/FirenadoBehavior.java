@@ -5,6 +5,7 @@ import java.util.Set;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
@@ -12,12 +13,7 @@ import org.bukkit.entity.Entity;
 public final class FirenadoBehavior implements TornadoBehavior {
 
     private static final Set<Material> HEAT_SOURCES = EnumSet.of(
-            Material.FIRE,
-            Material.SOUL_FIRE,
-            Material.LAVA,
-            Material.CAMPFIRE,
-            Material.SOUL_CAMPFIRE
-    );
+            Material.FIRE, Material.SOUL_FIRE, Material.LAVA, Material.CAMPFIRE, Material.SOUL_CAMPFIRE);
 
     @Override
     public TornadoType type() {
@@ -64,13 +60,17 @@ public final class FirenadoBehavior implements TornadoBehavior {
     }
 
     private boolean hasNearbyHeatSource(Location location) {
+        World world = location.getWorld();
         int centerX = location.getBlockX();
         int centerY = location.getBlockY();
         int centerZ = location.getBlockZ();
         for (int x = centerX - 6; x <= centerX + 6; x += 2) {
-            for (int y = centerY - 3; y <= centerY + 3; y++) {
-                for (int z = centerZ - 6; z <= centerZ + 6; z += 2) {
-                    if (HEAT_SOURCES.contains(location.getWorld().getBlockAt(x, y, z).getType())) {
+            for (int z = centerZ - 6; z <= centerZ + 6; z += 2) {
+                if (!world.isChunkLoaded(x >> 4, z >> 4)) {
+                    continue;
+                }
+                for (int y = centerY - 3; y <= centerY + 3; y++) {
+                    if (HEAT_SOURCES.contains(world.getBlockAt(x, y, z).getType())) {
                         return true;
                     }
                 }

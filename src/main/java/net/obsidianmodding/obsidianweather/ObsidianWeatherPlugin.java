@@ -2,6 +2,7 @@ package net.obsidianmodding.obsidianweather;
 
 import net.obsidianmodding.obsidianweather.commands.CommandBootstrap;
 import net.obsidianmodding.obsidianweather.config.WeatherConfig;
+import net.obsidianmodding.obsidianweather.events.TornadoProtectionListener;
 import net.obsidianmodding.obsidianweather.integration.IntegrationBootstrap;
 import net.obsidianmodding.obsidianweather.integration.ProtectionManager;
 import net.obsidianmodding.obsidianweather.tornado.core.TornadoManager;
@@ -23,6 +24,8 @@ public final class ObsidianWeatherPlugin extends JavaPlugin {
 
         ProtectionManager protectionManager = new ProtectionManager(getLogger());
         IntegrationBootstrap.registerAvailable(this, protectionManager, this::weatherConfig);
+        getServer().getPluginManager().registerEvents(
+                new TornadoProtectionListener(this::weatherConfig, protectionManager), this);
 
         BehaviorRegistry behaviorRegistry = new BehaviorRegistry();
         tornadoManager = new TornadoManager(getLogger(), this::weatherConfig, behaviorRegistry, protectionManager);

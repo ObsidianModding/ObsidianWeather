@@ -9,10 +9,13 @@ public final class MaterialWeight {
 
     public static int of(Material material) {
         String name = material.name();
-        if (material.isAir() || !material.isBlock() || material == Material.BEDROCK
-                || name.contains("PORTAL") || name.contains("COMMAND_BLOCK")
-                || material == Material.BARRIER || material == Material.STRUCTURE_BLOCK
-                || material == Material.JIGSAW || material == Material.LIGHT) {
+        if (material.isAir() || !material.isBlock()
+                || material == Material.WATER || material == Material.LAVA
+                || material == Material.FIRE || material == Material.SOUL_FIRE
+                || material == Material.BEDROCK || name.contains("PORTAL")
+                || name.contains("COMMAND_BLOCK") || material == Material.BARRIER
+                || material == Material.STRUCTURE_BLOCK || material == Material.JIGSAW
+                || material == Material.LIGHT) {
             return Integer.MAX_VALUE;
         }
         if (name.contains("LEAVES") || name.contains("FLOWER") || name.contains("CROP")

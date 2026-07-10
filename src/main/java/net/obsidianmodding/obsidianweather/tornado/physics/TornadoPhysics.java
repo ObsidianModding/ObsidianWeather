@@ -23,7 +23,7 @@ import org.bukkit.util.Vector;
 
 public final class TornadoPhysics {
 
-    private static final String DEBRIS_TAG = "obsidianweather-debris";
+    public static final String DEBRIS_TAG = "obsidianweather-debris";
 
     private final Supplier<WeatherConfig> configSupplier;
     private final ProtectionManager protectionManager;
@@ -62,6 +62,9 @@ public final class TornadoPhysics {
 
             Vector fromCenter = entity.getLocation().toVector().subtract(center.toVector());
             fromCenter.setY(0.0);
+            if (fromCenter.lengthSquared() < 0.001) {
+                fromCenter.setX(1.0);
+            }
             double distance = Math.max(0.4, fromCenter.length());
             double proximity = Math.max(0.15, 1.0 - (distance / radius));
             double tierForce = 0.65 + tornado.stats().damageMultiplier() * 0.35;
@@ -96,6 +99,9 @@ public final class TornadoPhysics {
             double distance = Math.sqrt(tornado.random().nextDouble()) * radius;
             int x = (int) Math.floor(center.getX() + Math.cos(angle) * distance);
             int z = (int) Math.floor(center.getZ() + Math.sin(angle) * distance);
+            if (!world.isChunkLoaded(x >> 4, z >> 4)) {
+                continue;
+            }
             int y = world.getHighestBlockYAt(x, z, HeightMap.WORLD_SURFACE);
             Block block = world.getBlockAt(x, y, z);
             Material material = block.getType();
@@ -129,6 +135,9 @@ public final class TornadoPhysics {
             double distance = Math.sqrt(tornado.random().nextDouble()) * tornado.stats().radius();
             int x = (int) Math.floor(center.getX() + Math.cos(angle) * distance);
             int z = (int) Math.floor(center.getZ() + Math.sin(angle) * distance);
+            if (!world.isChunkLoaded(x >> 4, z >> 4)) {
+                continue;
+            }
             int surfaceY = world.getHighestBlockYAt(x, z, HeightMap.WORLD_SURFACE);
             int y = tornado.type() == TornadoType.FIRENADO ? surfaceY + 1 : surfaceY;
             Block block = world.getBlockAt(x, y, z);
