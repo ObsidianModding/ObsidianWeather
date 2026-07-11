@@ -42,7 +42,7 @@ body:
       description: Select every integration installed on the affected server.
       multiple: true
       options:
-        - None
+        - No protection integrations
         - WorldGuard
         - Towny
     validations:
