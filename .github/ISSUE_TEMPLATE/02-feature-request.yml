@@ -1,0 +1,79 @@
+name: Feature request
+description: Suggest an improvement or new weather behavior.
+title: "[Feature]: "
+labels:
+  - enhancement
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the problem first, then the behavior you would like ObsidianWeather to add.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Feature area
+      options:
+        - Tornado behavior or visuals
+        - New weather event
+        - Configuration
+        - Commands
+        - Protection integration
+        - Performance
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or limitation
+      description: What server experience or use case is currently difficult or missing?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Explain how the feature should behave from a player and administrator perspective.
+    validations:
+      required: true
+
+  - type: textarea
+    id: configuration
+    attributes:
+      label: Suggested configuration
+      description: List any settings, defaults, permissions, or commands the feature would need.
+      render: yaml
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Describe any workarounds or different designs you considered.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: preparation
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and did not find the same request.
+          required: true
+        - label: This request does not depend on a spawn cooldown, global warning, boss bar, countdown, or siren.
+          required: true
+
+  - type: checkboxes
+    id: attention-check
+    attributes:
+      label: Attention check
+      description: Read this option carefully. It is intentionally not required.
+      options:
+        - label: By checking this box, I confirm that I am mindlessly checking boxes without reading what they say.
+          required: false

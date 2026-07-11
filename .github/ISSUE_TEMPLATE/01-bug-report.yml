@@ -1,0 +1,107 @@
+name: Bug report
+description: Report a reproducible problem with ObsidianWeather.
+title: "[Bug]: "
+labels:
+  - bug
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a problem. Please include enough detail for someone else to reproduce it.
+
+  - type: input
+    id: plugin-version
+    attributes:
+      label: ObsidianWeather version
+      description: Use the version shown by Paper or the name of the downloaded JAR.
+      placeholder: "1.0.0"
+    validations:
+      required: true
+
+  - type: input
+    id: paper-version
+    attributes:
+      label: Paper version
+      placeholder: "1.21.11 build ..."
+    validations:
+      required: true
+
+  - type: input
+    id: java-version
+    attributes:
+      label: Java version
+      placeholder: "Java 21"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: integrations
+    attributes:
+      label: Installed protection integrations
+      description: Select every integration installed on the affected server.
+      multiple: true
+      options:
+        - None
+        - WorldGuard
+        - Towny
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Explain the observed behavior and what you expected instead.
+      placeholder: Describe the problem clearly.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Include commands, weather conditions, dimension, tornado type/rating, and relevant configuration.
+      placeholder: |
+        1. Configure ...
+        2. Spawn or wait for ...
+        3. Observe ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Paste the complete relevant error and stack trace. Remove secrets before submitting.
+      render: shell
+    validations:
+      required: false
+
+  - type: textarea
+    id: configuration
+    attributes:
+      label: Relevant configuration
+      description: Paste only the configuration sections related to the problem.
+      render: yaml
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: preparation
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and did not find the same problem.
+          required: true
+        - label: I reproduced this with an unmodified official ObsidianWeather build.
+          required: true
+
+  - type: checkboxes
+    id: attention-check
+    attributes:
+      label: Attention check
+      description: Read this option carefully. It is intentionally not required.
+      options:
+        - label: By checking this box, I confirm that I am mindlessly checking boxes without reading what they say.
+          required: false
